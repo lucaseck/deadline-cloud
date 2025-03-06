@@ -7,6 +7,7 @@ pre-install-commands = [
 sync = "pip install -r requirements-testing.txt"
 test = "pytest --cov-config pyproject.toml {args:test/unit}"
 test_docker = "./scripts/run_sudo_tests.sh --build"
+test_installer = "pytest --no-cov {args:test/installer} -vvv --numprocesses=1"
 typing = "mypy {args:src test} --always-false=PYQT5 --always-false=PYSIDE2 --always-false=PYQT6 --always-true=PYSIDE6"
 style = [
   "ruff check {args:.}",
@@ -38,18 +39,6 @@ build = "hatch build"
 [envs.codebuild.env-vars]
 SKIP_BOOTSTRAP_TEST_RESOURCES="True"
 
-[envs.codebuild-installer]
-pre-install-commands = [
-  "pip install -r requirements-installer.txt"
-]
-
-[envs.codebuild-installer.env-vars]
-SKIP_BOOTSTRAP_TEST_RESOURCES="True"
-
-[envs.codebuild-installer.scripts]
-build = "hatch build"
-make_exe = "python scripts/pyinstaller/make_exe.py --output {env:OUT_FILE}"
-
 [envs.integ]
 pre-install-commands = [
   "pip install -r requirements-integ-testing.txt",
@@ -59,6 +48,9 @@ pre-install-commands = [
 [envs.integ.scripts]
 test = "pytest --no-cov {args:test/integ} -vvv --numprocesses=1"
 
+[envs.installer.env-vars]
+SKIP_BOOTSTRAP_TEST_RESOURCES="True"
+
 [envs.installer]
 pre-install-commands = [
   "pip install -r requirements-installer.txt"
@@ -66,7 +58,8 @@ pre-install-commands = [
 
 [envs.installer.scripts]
 build = "hatch build"
-make_exe = "python scripts/pyinstaller/make_exe.py --output {env:OUT_FILE}"
+make_exe = "python scripts/pyinstaller/make_exe.py --output {env:PYINSTALLER_OUT_FILE}"
+build_installer = "python {root}/scripts/build_installer.py {args:}"
 
 [envs.release]
 detached = true
